@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`set-timeout.js 1`] = `
+"setTimeout(() => {
+  thing();
+}, 500);
+
+setTimeout(function() {
+  thing();
+}, 500);
+
+reallyLonfMethodLongLongLongLongLongLongLongLongLong.LongLong.LongLong((f, g, h) => {
+  return f.pop();
+}, 3000, true);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setTimeout(() => {
+  thing();
+}, 500);
+
+setTimeout(function() {
+  thing();
+}, 500);
+
+reallyLonfMethodLongLongLongLongLongLongLongLongLong.LongLong.LongLong(
+  (f, g, h) => {
+    return f.pop();
+  },
+  3000,
+  true
+);
+"
+`;

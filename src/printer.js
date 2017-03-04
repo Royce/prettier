@@ -1925,6 +1925,14 @@ function shouldGroupLastArg(args) {
     (!penultimateArg || penultimateArg.type !== lastArg.type);
 }
 
+function shouldGroupFirstArg(args) {
+  const firstArg = args[0];
+  return (firstArg.type === 'FunctionExpression' ||
+    (firstArg.type === 'ArrowFunctionExpression' &&
+      firstArg.body.type === 'BlockStatement')) &&
+    args.slice(1).every(a => !typeIsFunction(a.type));
+}
+
 function printArgumentsList(path, options, print) {
   var printed = path.map(print, "arguments");
 
@@ -1948,6 +1956,39 @@ function printArgumentsList(path, options, print) {
             join(concat([",", line]), printed.slice(0, -1)),
             printed.length > 1 ? ", " : "",
             group(util.getLast(printed), { shouldBreak: true }),
+            ")"
+          ]),
+          group(
+            concat([
+              "(",
+              indent(
+                options.tabWidth,
+                concat([line, join(concat([",", line]), printed)])
+              ),
+              shouldPrintComma(options, "all") ? "," : "",
+              line,
+              ")"
+            ]),
+            { shouldBreak: true }
+          )
+        ],
+        { shouldBreak }
+      )
+    ]);
+  }
+
+  if (shouldGroupFirstArg(args)) {
+    const shouldBreak = printed.slice(1).some(willBreak);
+    return concat([
+      printed.some(willBreak) ? breakParent : "",
+      conditionalGroup(
+        [
+          concat(["(", join(concat([", "]), printed), ")"]),
+          concat([
+            "(",
+            group(printed[0], { shouldBreak: true }),
+            printed.length > 1 ? ", " : "",
+            join(concat([",", line]), printed.slice(1)),
             ")"
           ]),
           group(
@@ -2020,8 +2061,8 @@ function printFunctionParams(path, print, options) {
     lastParam.type === "RestElement") &&
     !fun.rest;
 
-  // If the parent is a call with the last argument expansion and this is the
-  // params of the last argument, we dont want the arguments to break and instead
+  // If the parent is a call with the first/last argument expansion and this is the
+  // params of the first/last argument, we dont want the arguments to break and instead
   // want the whole expression to be on a new line.
   //
   // Good:                 Bad:
@@ -2031,10 +2072,14 @@ function printFunctionParams(path, print, options) {
   //   })                    ) => {
   //                         })
   const parent = path.getParentNode();
-  if ((parent.type === "CallExpression" || parent.type === "NewExpression") &&
-    util.getLast(parent.arguments) === path.getValue() &&
-    shouldGroupLastArg(parent.arguments)) {
-    return concat(["(", join(", ", printed), ")"]);
+  if (
+    (parent.type === 'CallExpression' || parent.type === 'NewExpression') &&
+    ((util.getLast(parent.arguments) === path.getValue() &&
+      shouldGroupLastArg(parent.arguments)) ||
+      (parent.arguments[0] === path.getValue() &&
+        shouldGroupFirstArg(parent.arguments)))
+  ) {
+    return concat(['(', join(', ', printed), ')']);
   }
 
   return concat([
