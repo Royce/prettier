@@ -1944,6 +1944,15 @@ function shouldGroupLastArg(args) {
     (!penultimateArg || penultimateArg.type !== lastArg.type);
 }
 
+function isMemberExpressionWithIdentifierProperty(node) {
+  if (node.type === "MemberExpression") {
+    return node.property.type === "Identifier" &&
+      isMemberExpressionWithIdentifierProperty(node.object);
+  }
+
+  return node.type === "Identifier" || node.type === "ThisExpression";
+}
+
 function shouldGroupFirstArg(args) {
   if (args.length !== 2) {
     return false;
@@ -1961,7 +1970,9 @@ function shouldGroupFirstArg(args) {
         secondArg.type === "RegExpLiteral" ||
         secondArg.type === "NullLiteral" ||
         secondArg.type === "Literal" ||
-        secondArg.type === "Identifier");
+        secondArg.type === "Identifier" ||
+        secondArg.type === "ThisExpression" ||
+        isMemberExpressionWithIdentifierProperty(secondArg));
 }
 
 function printArgumentsList(path, options, print) {

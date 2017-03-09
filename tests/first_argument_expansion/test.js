@@ -10,6 +10,14 @@ func(() => {
   thing();
 }, identifier);
 
+func(function() {
+  thing();
+}, this.props.timeout);
+
+func((that) => {
+  thing();
+}, this);
+
 func(() => {
   thing();
 }, true);
@@ -39,6 +47,22 @@ func(function() {
 func(() => {
   thing();
 }, {yes: true, cats: 5});
+
+func(function() {
+  thing();
+}, getTimeout());
+
+func(() => {
+  thing();
+}, this.func().prop);
+
+func(function() {
+  thing();
+}, this.props.getTimeout());
+
+func(function() {
+  thing();
+}, this.props.timeout * 1000);
 
 compose((a) => {
   return a.thing;
